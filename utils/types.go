@@ -74,6 +74,10 @@ type KongClientConfig struct {
 	Debug         bool
 
 	Headers []string
+
+	CassandraContactPoint string
+	CassandraUsername string
+	CassandraPassword string
 }
 
 // HeaderRoundTripper injects Headers into requests

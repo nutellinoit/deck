@@ -121,7 +121,26 @@ func init() {
 		"disable colorized output")
 	viper.BindPFlag("no-color",
 		rootCmd.PersistentFlags().Lookup("no-color"))
+
+
+	rootCmd.PersistentFlags().Bool("cassandra-contact-point", false,
+		"Cassandra initial address")
+	viper.BindPFlag("cassandra-contact-point",
+		rootCmd.PersistentFlags().Lookup("cassandra-contact-point"))
+
+	rootCmd.PersistentFlags().Bool("cassandra-username", false,
+		"Cassandra username")
+	viper.BindPFlag("cassandra-username",
+		rootCmd.PersistentFlags().Lookup("cassandra-username"))
+
+	rootCmd.PersistentFlags().Bool("cassandra-password", false,
+		"Cassandra password")
+	viper.BindPFlag("cassandra-password",
+		rootCmd.PersistentFlags().Lookup("cassandra-password"))
+
 }
+
+
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
@@ -154,6 +173,11 @@ func initConfig() {
 	config.TLSSkipVerify = viper.GetBool("tls-skip-verify")
 	config.TLSCACert = viper.GetString("ca-cert")
 	config.Headers = viper.GetStringSlice("headers")
+
+	config.CassandraContactPoint = viper.GetString("cassandra-contact-point")
+	config.CassandraUsername = viper.GetString("cassandra-username")
+	config.CassandraPassword = viper.GetString("cassandra-password")
+
 	verbose = viper.GetInt("verbose")
 	noColor = viper.GetBool("no-color")
 

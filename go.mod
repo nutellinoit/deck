@@ -6,6 +6,7 @@ require (
 	github.com/fatih/color v1.9.0
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/ghodss/yaml v1.0.0
+	github.com/gocql/gocql v0.0.0-20200624222514-34081eda590e
 	github.com/hashicorp/go-immutable-radix v1.2.0 // indirect
 	github.com/hashicorp/go-memdb v1.1.2
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
