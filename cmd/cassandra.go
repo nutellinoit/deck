@@ -2,23 +2,23 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/gocql/gocql"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/gocql/gocql"
 	"time"
 )
 
 var (
-	cassandraKeyspace  string
-	cassandraFixer bool
+	cassandraKeyspace string
+	cassandraFixer    bool
 )
 
 // syncCmd represents the sync command
 var cassandraCmd = &cobra.Command{
-	Use: "cassandra",
+	Use:   "cassandra",
 	Short: "Cassandra is used to connect directly to Cassandra Cluster and find Orphaned resources on a workspace",
-	Long: `Cassandra is used to connect directly to Cassandra Cluster and find Orphaned resources on a workspace`,
-	Args: validateNoArgs,
+	Long:  `Cassandra is used to connect directly to Cassandra Cluster and find Orphaned resources on a workspace`,
+	Args:  validateNoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		cluster := gocql.NewCluster(config.CassandraContactPoint)
@@ -43,7 +43,7 @@ var cassandraCmd = &cobra.Command{
 		iter := query.Iter()
 		for iter.Scan(&consumerId, &consumerUsername) {
 			//fmt.Println("id:", consumerId,"username:", consumerUsername)
-			if countWorkspaceEntities(consumerId,session) == 0 {
+			if countWorkspaceEntities(consumerId, session) == 0 {
 				if !cassandraFixer {
 					return errors.New("Orphaned consumer: " + consumerId)
 				}
@@ -58,10 +58,10 @@ var cassandraCmd = &cobra.Command{
 		iter = query.Iter()
 		for iter.Scan(&keyAuthCredentialsId, &keyAuthCredentialsConsumerId) {
 			//fmt.Println("consumer_id:", keyAuthCredentialsConsumerId)
-			if countConsumers(keyAuthCredentialsConsumerId,session) == 0 {
+			if countConsumers(keyAuthCredentialsConsumerId, session) == 0 {
 				if !cassandraFixer {
 					return errors.New("Orphaned keyauth_credentials: " + keyAuthCredentialsId)
-				}else{
+				} else {
 					fmt.Println("Cleaning keyauth_credentials:", keyAuthCredentialsId)
 					if err := session.Query("DELETE FROM keyauth_credentials WHERE id = ?", keyAuthCredentialsId).Exec(); err != nil {
 						return errors.New("Error while deleting keyauth_credentials: " + keyAuthCredentialsId)
@@ -77,10 +77,10 @@ var cassandraCmd = &cobra.Command{
 		iter = query.Iter()
 		for iter.Scan(&pluginsId) {
 			//fmt.Println("id:", pluginsId)
-			if countWorkspaceEntities(pluginsId,session) != 1 {
+			if countWorkspaceEntities(pluginsId, session) != 1 {
 				if !cassandraFixer {
 					return errors.New("Orphaned plugins: " + pluginsId)
-				}else{
+				} else {
 					fmt.Println("Cleaning plugins:", pluginsId)
 					if err := session.Query("DELETE FROM plugins WHERE id = ?", pluginsId).Exec(); err != nil {
 						return errors.New("Error while deleting plugins: " + pluginsId)
@@ -96,10 +96,10 @@ var cassandraCmd = &cobra.Command{
 		iter = query.Iter()
 		for iter.Scan(&routesId) {
 			//fmt.Println("id:", routesId)
-			if countWorkspaceEntities(routesId,session) != 2 {
+			if countWorkspaceEntities(routesId, session) != 2 {
 				if !cassandraFixer {
 					return errors.New("Orphaned routes: " + routesId)
-				}else{
+				} else {
 					fmt.Println("Cleaning routes:", routesId)
 					if err := session.Query("DELETE FROM routes WHERE id = ? and partition = 'routes'", routesId).Exec(); err != nil {
 						return errors.New("Error while deleting routes: " + routesId)
@@ -115,10 +115,10 @@ var cassandraCmd = &cobra.Command{
 		iter = query.Iter()
 		for iter.Scan(&servicesId) {
 			//fmt.Println("id:", servicesId)
-			if countWorkspaceEntities(servicesId,session) != 2 {
+			if countWorkspaceEntities(servicesId, session) != 2 {
 				if !cassandraFixer {
 					return errors.New("Orphaned services: " + servicesId)
-				}else{
+				} else {
 					//fmt.Println("Cleaning keyauth_credentials:", keyAuthCredentialsId)
 					//if err := session.Query("DELETE FROM keyauth_credentials WHERE id = ?", keyAuthCredentialsId).Exec(); err != nil {
 					//	return errors.New("Error while deleting keyauth_credentials: " + keyAuthCredentialsId)
@@ -127,26 +127,26 @@ var cassandraCmd = &cobra.Command{
 			}
 		}
 
-		//var filesId string
-		//fmt.Println("Checking files (this will take long)...")
-		//query = session.Query("SELECT id FROM files")
-		//query.PageSize(1)
-		//iter = query.Iter()
-		//for iter.Scan(&filesId) {
-		//	//fmt.Println("id:", filesId)
-		//	if countWorkspaceEntities(filesId,session) != 2 {
-		//		if !cassandraFixer {
-		//			return errors.New("Orphaned files: " + servicesId)
-		//		}else{
-		//			//fmt.Println("Cleaning keyauth_credentials:", keyAuthCredentialsId)
-		//			//if err := session.Query("DELETE FROM keyauth_credentials WHERE id = ?", keyAuthCredentialsId).Exec(); err != nil {
-		//			//	return errors.New("Error while deleting keyauth_credentials: " + keyAuthCredentialsId)
-		//			//}
-		//		}
-		//	}
-		//}
+		var filesId string
+		fmt.Println("Checking files (this will take long)...")
+		query = session.Query("SELECT id FROM files")
+		query.PageSize(1)
+		iter = query.Iter()
+		for iter.Scan(&filesId) {
+			//fmt.Println("id:", filesId)
+			if countWorkspaceEntities(filesId, session) != 2 {
+				if !cassandraFixer {
+					return errors.New("Orphaned files: " + filesId)
+				} else {
+					fmt.Println("Cleaning files:", filesId)
+					if err := session.Query("DELETE FROM files WHERE id = ?", filesId).Exec(); err != nil {
+						return errors.New("Error while deleting files: " + filesId)
+					}
+				}
+			}
+		}
 
-		fmt.Println("Integrity check complete.")
+		fmt.Println("Integrity check complete. Everything OK.")
 		return nil
 	},
 }
@@ -159,18 +159,18 @@ func init() {
 		"Delete orphaned resources. PLEASE DO NOT USE IF NOT STRICTLY NECESSARY")
 }
 
-func countWorkspaceEntities(entityId string, session *gocql.Session) int{
+func countWorkspaceEntities(entityId string, session *gocql.Session) int {
 	var count int
-	iter := session.Query("select count(*) as count from workspace_entities where entity_id = ? allow filtering;",entityId).Iter()
+	iter := session.Query("select count(*) as count from workspace_entities where entity_id = ? allow filtering;", entityId).Iter()
 	for iter.Scan(&count) {
 		//fmt.Println("	Counted entities:",count)
 	}
 	return count
 }
 
-func countConsumers(id string, session *gocql.Session) int{
+func countConsumers(id string, session *gocql.Session) int {
 	var count int
-	iter := session.Query("select count(*) as count from consumers where id = ?;",id).Iter()
+	iter := session.Query("select count(*) as count from consumers where id = ?;", id).Iter()
 	for iter.Scan(&count) {
 		//fmt.Println("	Counted entities:",count)
 	}
